@@ -22,7 +22,7 @@ Usage:
 
 The API consists of the initialization parameters and three methods:
 
-- FastADC( channel, divisor ) // where channel follows Energia convention and divisor is a number between 0 and 8)
+- FastADC( channel, divisor ) // where channel follows Energia convention and divisor is a number between 0 and 8
 
 - setBuffer( uint16_t &pBuffer ) // is the buffer where the ADC data will be automatically transfered to
 
