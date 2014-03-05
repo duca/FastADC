@@ -10,19 +10,17 @@
 #include "wiring_private.h"
 #include "pins_energia.h"
 
+
 class FastADC
 {
   public:
-    FastADC(const int pin,const unsigned int div);
+    FastADC(const int& pin,const uint16_t& div);
+    FastADC(const int& nPins,  const unsigned int& div);
+    void initDefault();
     ~FastADC();
     void setBuffer(uint16_t &pBuffer);
     void stop();
     void start();
-    void setAnalogReference(uint16_t reference);
-
- private:
-  int m_pin, m_analogRef;
-
 };
 
 #endif // FAST_ADC_H

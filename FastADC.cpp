@@ -26,45 +26,58 @@
 #endif
 
 
-FastADC::FastADC(const int pin,const unsigned int div){
+FastADC::FastADC(const int& pin,const unsigned int& div){
+    initDefault();
+    ADC10CTL1 |= (pin << 12);   // select channel
+    ADC10CTL1 |= (div << 5);    // select divider
+    ADC10CTL1 |= CONSEQ_2;      // Repeated single channel mode  
+    ADC10DTC1 = 0x001;          // 1 CONVERSION
+    ADC10DTC0 &=~ADC10TB;       // 1 transfer block  
+    ADC10AE0 = (1 << pin);      // Disable input/output buffer 
+}
 
-  ADC10CTL0 &= ~ADC10ENC;            // DISABLE ADC
+FastADC::FastADC(const int& nPins,  const unsigned int& div){
+    initDefault();  
+    ADC10CTL1 |= (nPin << 12);   // select highest channel of the set
+    ADC10CTL1 |= (div << 5);     // select divider
+    ADC10CTL1 |= CONSEQ_3;       // Repeated single channel mode  
+    ADC10DTC1 = nPins;           // nPins = n transfers
+    ADC10DTC0 &=~ADC10TB;        // 1 transfer block  
+    ADC10AE0 = (1 << pin);       // Disable input/output buffer 
+}
 
-  ADC10CTL0 = ADC10SHT_0;  // 4 SAMPLES
-  ADC10CTL0 &=~ADC10IE;              // no need for Interrupt
-  ADC10CTL0 &=~ADC10SR;                // up to 200ksps
-  ADC10CTL0 |= SREF_0 + MSC + REFON;
-  ADC10CTL1 = ADC10SSEL_0;           // ADC10OSC as ADC10CLK (~5MHz)
-  ADC10CTL1 |= (pin << 12);        // select channel
-  ADC10CTL1 |= (div << 5);           // select divider
-  ADC10CTL1 |= CONSEQ_2;             // Repeated single channel mode  
-  ADC10DTC1 = 0x001;                 // 1 CONVERSION
-  ADC10DTC0 &=~ADC10TB;              // 1 transfer block  
-  ADC10DTC0 |=ADC10CT;              // 1 transfer block
-
-  ADC10AE0 = (1 << pin);           // Disable input/output buffer 
-
-
+void FastADC::initDefault(){
+    ADC10CTL0 &= ~ADC10ENC;      // DISABLE ADC
+    ADC10CTL0 = ADC10SHT_0;      // 4 SAMPLES
+    ADC10CTL0 &~= REFBURST       // Ref buffer on all the time (reduces spikes)
+    ADC10CTL0 &=~ADC10IE;        // no need for Interrupt
+    ADC10CTL0 &=~ADC10SR;        // up to 200ksps
+    ADC10CTL0 |= SREF_0 + MSC;   // ref=Vcc and multi sampl & conv
+    ADC10CTL0 |= REFON;
+    ADC10CTL1 = ADC10SSEL_0;     // ADC10OSC as ADC10CLK (~5MHz)
+    ADC10DTC0 |=ADC10CT;         // continuous transfer
 }
 
 FastADC::~FastADC(){
-  stop();
+    stop();
 }
 
 
 void FastADC::setBuffer(uint16_t &pBuffer){
-  ADC10SA = (unsigned int)&pBuffer;
+    ADC10SA = (unsigned int)&pBuffer;
   
 }
-void FastADC::stop(){
-     ADC10CTL0 &= ~ADC10ENC;            // DISABLE ADC
-     ADC10CTL0 &=~ENC;
-     ADC10CTL0 &=~ADC10SC;             // Stop sampling
+void FastADC::stop(
+){
+    ADC10CTL0 &= ~ADC10ENC;      // DISABLE ADC
+    ADC10CTL0 &=~ENC;            // 
+    ADC10CTL0 &=~ADC10SC;        // Stop adc clock
 }
 
 void FastADC::start(){
-     ADC10CTL0 |= ENC + ADC10ON;             
-     ADC10CTL0 |= ADC10ENC + ADC10SC;            // DISABLE ADC
+    ADC10CTL0 |= ENC + ADC10ON;             
+    ADC10CTL0 |= ADC10ENC + ADC10SC; // Enable ADC
 
 }
+
 
